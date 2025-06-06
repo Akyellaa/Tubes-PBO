@@ -1,9 +1,10 @@
+// ✅ TaskManager.jsx (disesuaikan ke struktur API)
 import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import TaskCard from './TaskCard';
 import TaskFilters from './TaskFilters';
 import TaskTabs from './TaskTabs';
-import EditTaskModal from './EditTaskModal'; // pastikan file ini ada
+import EditTaskModal from './EditTaskModal';
 
 const TaskManager = () => {
   const [tasks, setTasks] = useState([]);
@@ -14,51 +15,45 @@ const TaskManager = () => {
   const [editingTask, setEditingTask] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const mockTasks = [
+  const mockTasksFromAPI = [
     {
-      id: 1,
-      title: "Olahraga Sore",
-      description: "Jogging di taman kota",
-      status: "completed",
-      priority: "high",
-      category: "Personal",
-      color: "blue",
-      dueDate: "Apr 16, 2025",
-      dueTime: "00:00",
+      uuid: '1234',
+      title: 'Belajar React',
+      description: 'Mengerjakan latihan useEffect',
+      category: { name: 'Work' },
+      priority: 3,
+      deadline: '2025-04-16T10:00:00Z',
       hasReminder: true,
-      isWeekly: true,
+      reminderTime: '30 minutes before',
+      taskType: 'RECURRING',
+      recurrenceDays: ['MONDAY'],
+      status: 'PENDING',
     },
-    {
-      id: 2,
-      title: "Ngoding UI",
-      description: "Buat tampilan tugas",
-      status: "pending",
-      priority: "medium",
-      category: "Work",
-      color: "green",
-      dueDate: "Apr 17, 2025",
-      dueTime: "10:00",
-      hasReminder: false,
-      isWeekly: false,
-    }
   ];
 
+  const transformFromAPI = (task) => {
+    const date = new Date(task.deadline);
+    return {
+      ...task,
+      id: task.uuid,
+      dueDate: date.toISOString().split('T')[0],
+      dueTime: date.toTimeString().slice(0, 5),
+      status: task.status.toUpperCase(),
+    };
+  };
+
   useEffect(() => {
-    setTasks(mockTasks);
+    const formatted = mockTasksFromAPI.map(transformFromAPI);
+    setTasks(formatted);
   }, []);
 
   const handleToggleComplete = (taskToUpdate) => {
-    setTasks(prev =>
-      prev.map(t =>
-        t.id === taskToUpdate.id
-          ? { ...t, status: t.status === 'completed' ? 'pending' : 'completed' }
-          : t
-      )
-    );
+    const newStatus = taskToUpdate.status === 'COMPLETED' ? 'PENDING' : 'COMPLETED';
+    setTasks(prev => prev.map(t => t.uuid === taskToUpdate.uuid ? { ...t, status: newStatus } : t));
   };
 
   const handleDeleteTask = (taskToDelete) => {
-    setTasks(prev => prev.filter(t => t.id !== taskToDelete.id));
+    setTasks(prev => prev.filter(t => t.uuid !== taskToDelete.uuid));
   };
 
   const handleEditTask = (task) => {
@@ -67,9 +62,7 @@ const TaskManager = () => {
   };
 
   const handleUpdateTask = (updatedTask) => {
-    setTasks(prev =>
-      prev.map(t => (t.id === updatedTask.id ? updatedTask : t))
-    );
+    setTasks(prev => prev.map(t => (t.uuid === updatedTask.uuid ? transformFromAPI(updatedTask) : t)));
     setEditingTask(null);
     setIsEditModalOpen(false);
   };
@@ -80,22 +73,24 @@ const TaskManager = () => {
       task.description.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesPriority =
-      priorityFilter === 'All Priorities' || task.priority?.toLowerCase() === priorityFilter.toLowerCase();
+      priorityFilter === 'All Priorities' ||
+      (priorityFilter === 'High' && task.priority === 3) ||
+      (priorityFilter === 'Medium' && task.priority === 2) ||
+      (priorityFilter === 'Low' && task.priority === 1);
 
     const matchesCategory =
-      categoryFilter === 'All Categories' || task.category?.toLowerCase() === categoryFilter.toLowerCase();
+      categoryFilter === 'All Categories' || task.category?.name === categoryFilter;
 
     const matchesStatus =
       activeTab === 'All Tasks' ||
-      (activeTab === 'Pending' && task.status === 'pending') ||
-      (activeTab === 'Completed' && task.status === 'completed');
+      (activeTab === 'Pending' && task.status === 'PENDING') ||
+      (activeTab === 'Completed' && task.status === 'COMPLETED');
 
     return matchesSearch && matchesPriority && matchesCategory && matchesStatus;
   });
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
-      {/* Filter */}
       <TaskFilters
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -104,11 +99,8 @@ const TaskManager = () => {
         categoryFilter={categoryFilter}
         setCategoryFilter={setCategoryFilter}
       />
-
-      {/* Tabs */}
       <TaskTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      {/* Task List */}
       <div className="bg-white rounded-lg shadow-sm p-6 mt-4">
         {filteredTasks.length === 0 ? (
           <div className="text-center py-12">
@@ -121,7 +113,7 @@ const TaskManager = () => {
           <div className="space-y-4">
             {filteredTasks.map(task => (
               <TaskCard
-                key={task.id}
+                key={task.uuid}
                 task={task}
                 onToggleComplete={handleToggleComplete}
                 onEdit={handleEditTask}
@@ -132,7 +124,6 @@ const TaskManager = () => {
         )}
       </div>
 
-      {/* Edit Modal */}
       {isEditModalOpen && editingTask && (
         <EditTaskModal
           task={editingTask}

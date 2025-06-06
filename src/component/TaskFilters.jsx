@@ -32,9 +32,9 @@ function TaskFilters({
             className="appearance-none pl-9 pr-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-sm bg-white"
           >
             <option>All Priorities</option>
-            <option>high</option>
-            <option>medium</option>
-            <option>low</option>
+            <option>High</option>
+            <option>Medium</option>
+            <option>Low</option>
           </select>
         </div>
 
@@ -47,9 +47,9 @@ function TaskFilters({
             className="appearance-none pl-9 pr-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-purple-400 shadow-sm bg-white"
           >
             <option>All Categories</option>
-            <option>work</option>
-            <option>personal</option>
-            <option>others</option>
+            <option>Work</option>
+            <option>Personal</option>
+            <option>Others</option>
           </select>
         </div>
       </div>

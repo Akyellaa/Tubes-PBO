@@ -1,11 +1,16 @@
-import Navbar from "./component/NavBar";
+import Header from "./Header.jsx";
+import Footer from "./Footer.jsx";
+import DashboardStats from "./component/DashboardStats";
+import TaskManager from "./component/TaskManager.jsx";
 
 function App(){
   return(
-    <div>
-      <h1>Ini dari App.tsx</h1>
-      <Navbar />
-    </div>
+    <>
+      <Header></Header>
+      <DashboardStats />
+      <TaskManager />
+      <Footer></Footer>
+    </>
   );
 }
 
